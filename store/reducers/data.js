@@ -17,6 +17,17 @@ const reducer = (state=[], actions) => {
         return state = [...state, payload]
     }
     if(type === 'DELETE_ITEM') {
+        db.transaction(txn => {
+            txn.executeSql(
+                "DELETE FROM users WHERE id=?",
+                [payload],
+                (txnObj, results) => {
+                    if(results.rowsAffected > 0)
+                        alert(`${results.rowsAffected} data deleted successfully.`)
+                },
+                (txnObj, error) => {console.error("Error", error)}
+            )
+        })
         return state.filter(each => each.id !== payload);
     }
 
