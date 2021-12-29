@@ -17,7 +17,6 @@ export default function Create({navigation}) {
         try {
             db.transaction(async(txn) =>{
                 await txn.executeSql(
-                    // `INSERT INTO users (name, age) VALUES (${name}, ${age})`
                     `INSERT INTO users (name, age) VALUES (?,?)`,
                     [name, age],
                     (txObj, resultSet) => {
