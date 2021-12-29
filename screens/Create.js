@@ -23,7 +23,7 @@ export default function Create({navigation}) {
                     (txObj, resultSet) => {
                         // console.log('Success', resultSet)
                         if(resultSet.rowsAffected < 1) console.log('There is a problem creating new data')
-
+                        
                         dispatch({type: 'NEW_DATA', payload: {id: resultSet.insertId, name, age} })
                         navigation.navigate('Home')
                     },

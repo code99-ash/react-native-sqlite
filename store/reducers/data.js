@@ -14,7 +14,7 @@ const reducer = (state=[], actions) => {
         return state = payload
     }
     if(type === 'NEW_DATA') {
-        return state = [...state, payload]
+        return [...state, payload]
     }
     if(type === 'DELETE_ITEM') {
         db.transaction(txn => {
