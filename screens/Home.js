@@ -32,10 +32,23 @@ export default function Home({navigation}) {
         })
     }
 
+    const deleteItem = id => {
+        dispatch({type: 'DELETE_ITEM', payload: id})
+    }
+
     const renderItem = ({item}) => {
         return (
-            <View>
-                <Text style={styles.text}>{item.name} - {item.age}</Text>
+            <View style={styles.dataList}>
+                <View style={styles.dataProp}>
+                    <Text style={styles.text}>{item.name}</Text>
+                    <Text style={[styles.text, styles.age]}>{item.age}</Text>
+                </View>
+                <Button 
+                    title="X" 
+                    style={styles.deleteBtn} 
+                    color="red" 
+                    onPress={() => deleteItem(item.id)}
+                />
             </View>
         )
     }
@@ -47,7 +60,6 @@ export default function Home({navigation}) {
                 renderItem={renderItem}
                 keyExtractor={(item) => item.id}
             />
-
         </View>
     )
 }
@@ -56,5 +68,23 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 20,
         fontWeight: 'bold'
+    },
+    dataList: {
+        padding: 8,
+        backgroundColor: '#fff',
+        marginVertical: 3,
+        flexDirection: 'row',
+        justifyContent: 'space-between'
+    },
+    dataProp: {
+        flexDirection: 'row',
+        alignItems: 'baseline'
+    },
+    age: {
+        marginLeft: 10,
+        color: '#999'
+    },
+    deleteBtn: {
+        marginRight: 8
     }
 })

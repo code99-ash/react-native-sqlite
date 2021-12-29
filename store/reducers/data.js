@@ -16,6 +16,9 @@ const reducer = (state=[], actions) => {
     if(type === 'NEW_DATA') {
         return state = [...state, payload]
     }
+    if(type === 'DELETE_ITEM') {
+        return state.filter(each => each.id !== payload);
+    }
 
     return state;
 }
