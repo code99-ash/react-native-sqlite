@@ -1,81 +1,90 @@
-import React, {useEffect, useState} from 'react';
-import { View, Text, StyleSheet, SafeAreaView, FlatList, Image, Pressable } from 'react-native';
-import * as Contacts from 'expo-contacts'
+import React, { useEffect, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { View, Text, StyleSheet, FlatList, Button } from 'react-native';
+import * as SQLite from 'expo-sqlite';
+
+const db = SQLite.openDatabase('tutorialDB');
+
+db.transaction(tx =>{
+    tx.executeSql(
+        'CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, age INT)'
+    )
+})
 
 export default function Home({navigation}) {
-    const [contacts, setContacts]  = useState([]);
- 
-    useEffect(async() => {
-            const {status} = await Contacts.requestPermissionsAsync();
-            if(status === 'granted') {
-                const {data} = await Contacts.getContactsAsync({});
-                setContacts(data);
-                // if(data.length > 0) {
-                //     const contact = data.find(each => each.id === "8253");
-                //     console.log(contact)
-                // }
-            }
-            
+    const dispatch = useDispatch();
+    const {data} = useSelector(state => state);
+
+    
+    useEffect(() => {
+        getData()
     }, [])
 
-    const navigateTo = item => {
-        navigation.navigate('Message', {item})
+    
+    const getData = () => {
+        db.transaction(txn =>{
+            txn.executeSql(
+                "SELECT * FROM users",
+                [],
+                (txObj, {rows: {_array} }) => { dispatch({type: 'PASS_DATA', payload: _array}) },
+                (txObj, error) => console.log('Error ', error)
+            )
+        })
     }
 
-    const renderItem = ({ item }) => (
-            <Pressable style={styles.item} onPress={()=>navigateTo(item)}>
-                <Image 
-                    source={!item.imageAvailable?
-                        require('../assets/favicon.png'):{uri: item.image.uri}} 
-                    style={styles.image}
-                />
-                <View>
-                    <Text style={styles.name}>{item.name}</Text>
-                    {item.phoneNumbers?.map((each, i) => i == 0 && <Text key={i} style={styles.num}>{each.number}</Text>)}
-                    {/* <Text>{item.id}</Text> */}
+    const deleteItem = id => {
+        dispatch({type: 'DELETE_ITEM', payload: id})
+    }
+
+    const renderItem = ({item}) => {
+        return (
+            <View style={styles.dataList}>
+                <View style={styles.dataProp}>
+                    <Text style={styles.text}>{item.name}</Text>
+                    <Text style={[styles.text, styles.age]}>{item.age}</Text>
                 </View>
-            </Pressable>
-        );
+                <Button 
+                    title="X" 
+                    style={styles.deleteBtn} 
+                    color="red" 
+                    onPress={() => deleteItem(item.id)}
+                />
+            </View>
+        )
+    }
     return (
         <View>
-            {/* <Text style={styles.text}>Home Screen</Text> */}
-            <SafeAreaView style={styles.container}>
-                <FlatList 
-                    data={contacts} 
-                    renderItem={renderItem} 
-                    keyExtractor={item => item.id} 
-                />
-            </SafeAreaView>
+            <Button title="New" onPress={() => navigation.navigate('Create')} />
+            <FlatList 
+                data={data}
+                renderItem={renderItem}
+                keyExtractor={(item) => item.id}
+            />
         </View>
     )
 }
 
 const styles = StyleSheet.create({
-    item: {
-        paddingHorizontal: 8,
-        paddingVertical: 10,
-        flexDirection: 'row',
-        backgroundColor: '#fff',
-        marginTop: 1.5
-    },
-    name: {
-        color: '#000',
-        fontSize: 18,
-        fontWeight: 'bold'
-    },
-    num: {
-        color: '#999',
-        fontSize: 12
-    },
-    image: {
-        width: 50,
-        height: 50,
-        marginRight: 10,
-        borderRadius: 50
-    },
     text: {
         fontSize: 20,
-        fontWeight: 'bold',
-        textAlign: 'center'
+        fontWeight: 'bold'
     },
+    dataList: {
+        padding: 8,
+        backgroundColor: '#fff',
+        marginVertical: 3,
+        flexDirection: 'row',
+        justifyContent: 'space-between'
+    },
+    dataProp: {
+        flexDirection: 'row',
+        alignItems: 'baseline'
+    },
+    age: {
+        marginLeft: 10,
+        color: '#999'
+    },
+    deleteBtn: {
+        marginRight: 8
+    }
 })
